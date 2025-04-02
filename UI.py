@@ -1,5 +1,6 @@
 import streamlit as st
 import sounddevice as sd
+import tempfile
 import wave
 import numpy as np
 import pickle
@@ -65,17 +66,28 @@ def process_audio(file_path):
     st.success(text_data)
     st.success(f"Detected as: {predicted_label[0]}")
 
-def upload_file():
-    uploaded_file = st.file_uploader("Upload a WAV file", type=["wav"])
-    if uploaded_file:
-        file_path = r"D:\Fraud_Call_Detection\uploaded_audio.wav"
-        with open(file_path, "wb") as f:
-            f.write(uploaded_file.read())
-        process_audio(file_path)
-        os.remove(file_path)
+def handle_upload():
+    """Handles the upload process after button click."""
+    if st.session_state.uploaded_file is None:
+        st.warning("No file uploaded. Please select a WAV file first.")
+        return
+
+    # Save file to a temporary directory
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_file:
+        temp_file.write(st.session_state.uploaded_file.read())
+        file_path = temp_file.name  # Get temp file path
+
+    st.success("File uploaded. Please wait while file is in processing")
+
+    # Process the file (Replace with actual processing logic)
+    process_audio(file_path)
+
+    # Optionally, delete file after processing
+    os.remove(file_path)
+    st.success("File processed and removed successfully!")
 
 def record_audio():
-    duration = 5  # seconds
+    duration = 10  # seconds
     fs = 44100  # Sample rate
     st.info("Recording will start. Speak now...")
     recording = sd.rec(int(duration * fs), samplerate=fs, channels=2, dtype=np.int16)
@@ -91,8 +103,18 @@ st.sidebar.header("This is an app to detect Fraud and Real Calls.\
  It would be helpful in detecting potential fraud calls which are received and causing into financial losses")
 
 # File uploader
-if st.button("Upload WAV File"):
-    upload_file()
+# Ensure session state is initialized
+if "uploaded_file" not in st.session_state:
+    st.session_state.uploaded_file = None
+
+# File uploader (Stores the file in session state)
+uploaded_file = st.file_uploader("Upload a WAV file", type=["wav"])
+
+if uploaded_file:
+    st.session_state.uploaded_file = uploaded_file  # Store file in session
+
+if st.button("Process Uploaded File"):
+    handle_upload()
 
 # To record voice
 if st.button("Record Audio"):
