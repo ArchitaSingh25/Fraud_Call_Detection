@@ -8,3 +8,14 @@ Clone this repository and install the dependencies:
 
 ```bash
 git clone https://github.com/ArchitaSingh25/Fraud_Call_Detection.git
+```
+## 🛠️ Usage
+
+Run the application using:
+
+```bash
+streamlit run UI.py
+```
+## ✨User Interface
+<img src="image.png" alt="Alt text" width="500"/>
+
